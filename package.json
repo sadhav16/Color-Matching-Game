@@ -1,0 +1,9 @@
+{
+  "name": "color-matching-game",
+  "version": "1.0.0",
+  "description": "Interactive color matching game for children",
+  "main": "index.html",
+  "scripts": {
+    "start": "serve ."
+  }
+}

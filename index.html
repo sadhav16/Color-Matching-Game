@@ -1,0 +1,530 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Color Matching Game for Kids</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Comic Sans MS', cursive, sans-serif;
+            background: linear-gradient(135deg, #ff9a9e 0%, #fecfef 50%, #fecfef 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            overflow-x: hidden;
+        }
+
+        .game-container {
+            background: white;
+            border-radius: 25px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+            padding: 30px;
+            max-width: 800px;
+            width: 90vw;
+            text-align: center;
+            position: relative;
+        }
+
+        .header {
+            margin-bottom: 30px;
+        }
+
+        .title {
+            font-size: 2.5rem;
+            color: #ff6b6b;
+            margin-bottom: 10px;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.1);
+        }
+
+        .score {
+            font-size: 1.5rem;
+            color: #4ecdc4;
+            font-weight: bold;
+        }
+
+        .target-color {
+            font-size: 3rem;
+            font-weight: bold;
+            margin: 20px 0;
+            padding: 20px;
+            border-radius: 15px;
+            background: linear-gradient(45deg, #ffd93d 0%, #ff6b6b 100%);
+            color: white;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+            100% { transform: scale(1); }
+        }
+
+        .options-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 20px;
+            margin: 30px 0;
+        }
+
+        .option-card {
+            background: white;
+            border: 4px solid #e0e0e0;
+            border-radius: 20px;
+            padding: 30px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 8px 16px rgba(0,0,0,0.1);
+            min-height: 150px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .option-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 12px 24px rgba(0,0,0,0.15);
+        }
+
+        .option-card.correct {
+            border-color: #4caf50;
+            background: linear-gradient(45deg, #4caf50, #81c784);
+            color: white;
+            animation: correctAnswer 0.6s ease;
+        }
+
+        .option-card.wrong {
+            border-color: #f44336;
+            animation: shake 0.6s ease;
+        }
+
+        @keyframes correctAnswer {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.1); }
+            100% { transform: scale(1); }
+        }
+
+        @keyframes shake {
+            0%, 100% { transform: translateX(0); }
+            10%, 30%, 50%, 70%, 90% { transform: translateX(-10px); }
+            20%, 40%, 60%, 80% { transform: translateX(10px); }
+        }
+
+        .object-emoji {
+            font-size: 4rem;
+            margin-bottom: 10px;
+        }
+
+        .object-name {
+            font-size: 1.2rem;
+            font-weight: bold;
+            color: #333;
+        }
+
+        .option-card.correct .object-name {
+            color: white;
+        }
+
+        .celebration {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 1000;
+        }
+
+        .confetti {
+            position: absolute;
+            width: 10px;
+            height: 10px;
+            background: #ff6b6b;
+            animation: confetti-fall 3s ease-out forwards;
+        }
+
+        @keyframes confetti-fall {
+            0% {
+                transform: translateY(-100vh) rotate(0deg);
+                opacity: 1;
+            }
+            100% {
+                transform: translateY(100vh) rotate(720deg);
+                opacity: 0;
+            }
+        }
+
+        .large-emoji {
+            font-size: 8rem;
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%) scale(0);
+            z-index: 999;
+            animation: emojiPop 2s ease forwards;
+        }
+
+        @keyframes emojiPop {
+            0% { transform: translate(-50%, -50%) scale(0) rotate(0deg); }
+            50% { transform: translate(-50%, -50%) scale(1.2) rotate(180deg); }
+            100% { transform: translate(-50%, -50%) scale(1) rotate(360deg); }
+        }
+
+        .next-button {
+            background: linear-gradient(45deg, #4ecdc4, #44a08d);
+            color: white;
+            border: none;
+            padding: 15px 30px;
+            font-size: 1.5rem;
+            border-radius: 15px;
+            cursor: pointer;
+            margin-top: 20px;
+            transition: all 0.3s ease;
+            font-family: inherit;
+            font-weight: bold;
+        }
+
+        .next-button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 16px rgba(0,0,0,0.2);
+        }
+
+        .feedback-message {
+            font-size: 1.5rem;
+            margin: 20px 0;
+            font-weight: bold;
+            min-height: 40px;
+        }
+
+        .success {
+            color: #4caf50;
+        }
+
+        .try-again {
+            color: #ff9800;
+        }
+
+        .level-indicator {
+            position: absolute;
+            top: 20px;
+            right: 30px;
+            background: #4ecdc4;
+            color: white;
+            padding: 10px 20px;
+            border-radius: 20px;
+            font-weight: bold;
+        }
+
+        @media (max-width: 600px) {
+            .options-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .title {
+                font-size: 2rem;
+            }
+            
+            .target-color {
+                font-size: 2rem;
+            }
+            
+            .object-emoji {
+                font-size: 3rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="game-container">
+        <div class="level-indicator">Level <span id="level">1</span></div>
+        
+        <div class="header">
+            <h1 class="title">🌈 Color Matching Game</h1>
+            <div class="score">Score: <span id="score">0</span></div>
+        </div>
+
+        <div class="target-color" id="targetColor">Find the RED object!</div>
+        
+        <div class="feedback-message" id="feedbackMessage"></div>
+        
+        <div class="options-grid" id="optionsGrid">
+            <!-- Options will be dynamically generated -->
+        </div>
+        
+        <button class="next-button" id="nextButton" style="display: none;">Next Round! 🎉</button>
+    </div>
+
+    <div class="celebration" id="celebration"></div>
+
+    <script>
+        class ColorMatchingGame {
+            constructor() {
+                this.score = 0;
+                this.level = 1;
+                this.currentRound = 0;
+                this.gameData = this.initializeGameData();
+                this.init();
+            }
+
+            initializeGameData() {
+                return [
+                    {
+                        color: 'RED',
+                        colorCode: '#ff4757',
+                        objects: [
+                            { name: 'Apple', emoji: '🍎', isTarget: true },
+                            { name: 'Banana', emoji: '🍌', isTarget: false },
+                            { name: 'Tree', emoji: '🌳', isTarget: false },
+                            { name: 'Ocean', emoji: '🌊', isTarget: false }
+                        ]
+                    },
+                    {
+                        color: 'BLUE',
+                        colorCode: '#3742fa',
+                        objects: [
+                            { name: 'Car', emoji: '🚙', isTarget: false },
+                            { name: 'Ocean', emoji: '🌊', isTarget: true },
+                            { name: 'Sun', emoji: '☀️', isTarget: false },
+                            { name: 'Apple', emoji: '🍎', isTarget: false }
+                        ]
+                    },
+                    {
+                        color: 'YELLOW',
+                        colorCode: '#ffa502',
+                        objects: [
+                            { name: 'Banana', emoji: '🍌', isTarget: true },
+                            { name: 'Tree', emoji: '🌳', isTarget: false },
+                            { name: 'Ocean', emoji: '🌊', isTarget: false },
+                            { name: 'Grapes', emoji: '🍇', isTarget: false }
+                        ]
+                    },
+                    {
+                        color: 'GREEN',
+                        colorCode: '#2ed573',
+                        objects: [
+                            { name: 'Apple', emoji: '🍎', isTarget: false },
+                            { name: 'Tree', emoji: '🌳', isTarget: true },
+                            { name: 'Fire', emoji: '🔥', isTarget: false },
+                            { name: 'Ocean', emoji: '🌊', isTarget: false }
+                        ]
+                    },
+                    {
+                        color: 'PURPLE',
+                        colorCode: '#a55eea',
+                        objects: [
+                            { name: 'Sun', emoji: '☀️', isTarget: false },
+                            { name: 'Grapes', emoji: '🍇', isTarget: true },
+                            { name: 'Tree', emoji: '🌳', isTarget: false },
+                            { name: 'Ocean', emoji: '🌊', isTarget: false }
+                        ]
+                    },
+                    {
+                        color: 'ORANGE',
+                        colorCode: '#ff6348',
+                        objects: [
+                            { name: 'Orange', emoji: '🍊', isTarget: true },
+                            { name: 'Tree', emoji: '🌳', isTarget: false },
+                            { name: 'Ocean', emoji: '🌊', isTarget: false },
+                            { name: 'Grapes', emoji: '🍇', isTarget: false }
+                        ]
+                    }
+                ];
+            }
+
+            init() {
+                this.updateScore();
+                this.updateLevel();
+                this.startNewRound();
+                this.setupEventListeners();
+            }
+
+            setupEventListeners() {
+                document.getElementById('nextButton').addEventListener('click', () => {
+                    this.nextRound();
+                });
+            }
+
+            startNewRound() {
+                const currentGame = this.gameData[this.currentRound % this.gameData.length];
+                this.displayTargetColor(currentGame.color, currentGame.colorCode);
+                this.displayOptions(currentGame.objects);
+                this.clearFeedback();
+                document.getElementById('nextButton').style.display = 'none';
+            }
+
+            displayTargetColor(color, colorCode) {
+                const targetElement = document.getElementById('targetColor');
+                targetElement.textContent = `Find the ${color} object!`;
+                targetElement.style.background = `linear-gradient(45deg, ${colorCode}, #ffd93d)`;
+            }
+
+            displayOptions(objects) {
+                const optionsGrid = document.getElementById('optionsGrid');
+                optionsGrid.innerHTML = '';
+                
+                // Shuffle objects for random placement
+                const shuffled = [...objects].sort(() => Math.random() - 0.5);
+                
+                shuffled.forEach((obj, index) => {
+                    const optionCard = document.createElement('div');
+                    optionCard.className = 'option-card';
+                    optionCard.innerHTML = `
+                        <div class="object-emoji">${obj.emoji}</div>
+                        <div class="object-name">${obj.name}</div>
+                    `;
+                    
+                    optionCard.addEventListener('click', () => {
+                        this.handleOptionClick(optionCard, obj);
+                    });
+                    
+                    optionsGrid.appendChild(optionCard);
+                });
+            }
+
+            handleOptionClick(card, obj) {
+                // Disable all cards
+                const allCards = document.querySelectorAll('.option-card');
+                allCards.forEach(c => c.style.pointerEvents = 'none');
+
+                if (obj.isTarget) {
+                    this.handleCorrectAnswer(card, obj);
+                } else {
+                    this.handleWrongAnswer(card);
+                }
+            }
+
+            handleCorrectAnswer(card, obj) {
+                card.classList.add('correct');
+                this.score += 10;
+                this.updateScore();
+                
+                this.showFeedback('Excellent! Well done! 🎉', 'success');
+                this.createConfetti();
+                this.showLargeEmoji(obj.emoji);
+                this.playSuccessSound();
+                
+                setTimeout(() => {
+                    document.getElementById('nextButton').style.display = 'block';
+                }, 2000);
+            }
+
+            handleWrongAnswer(card) {
+                card.classList.add('wrong');
+                this.showFeedback('Try again! You can do it! 💪', 'try-again');
+                
+                setTimeout(() => {
+                    card.classList.remove('wrong');
+                    const allCards = document.querySelectorAll('.option-card');
+                    allCards.forEach(c => c.style.pointerEvents = 'auto');
+                }, 1000);
+            }
+
+            createConfetti() {
+                const celebration = document.getElementById('celebration');
+                const colors = ['#ff6b6b', '#4ecdc4', '#45b7d1', '#96ceb4', '#feca57', '#ff9ff3'];
+                
+                for (let i = 0; i < 50; i++) {
+                    const confetti = document.createElement('div');
+                    confetti.className = 'confetti';
+                    confetti.style.left = Math.random() * 100 + '%';
+                    confetti.style.background = colors[Math.floor(Math.random() * colors.length)];
+                    confetti.style.animationDelay = Math.random() * 2 + 's';
+                    confetti.style.animationDuration = (Math.random() * 3 + 2) + 's';
+                    
+                    celebration.appendChild(confetti);
+                    
+                    setTimeout(() => {
+                        confetti.remove();
+                    }, 5000);
+                }
+            }
+
+            showLargeEmoji(emoji) {
+                const largeEmoji = document.createElement('div');
+                largeEmoji.className = 'large-emoji';
+                largeEmoji.textContent = emoji;
+                document.body.appendChild(largeEmoji);
+                
+                setTimeout(() => {
+                    largeEmoji.remove();
+                }, 2000);
+            }
+
+            playSuccessSound() {
+                // Create a simple success sound using Web Audio API
+                try {
+                    const audioContext = new (window.AudioContext || window.webkitAudioContext)();
+                    const oscillator = audioContext.createOscillator();
+                    const gainNode = audioContext.createGain();
+                    
+                    oscillator.connect(gainNode);
+                    gainNode.connect(audioContext.destination);
+                    
+                    oscillator.frequency.setValueAtTime(523.25, audioContext.currentTime); // C5
+                    oscillator.frequency.setValueAtTime(659.25, audioContext.currentTime + 0.1); // E5
+                    oscillator.frequency.setValueAtTime(783.99, audioContext.currentTime + 0.2); // G5
+                    
+                    gainNode.gain.setValueAtTime(0.3, audioContext.currentTime);
+                    gainNode.gain.exponentialRampToValueAtTime(0.001, audioContext.currentTime + 0.5);
+                    
+                    oscillator.start(audioContext.currentTime);
+                    oscillator.stop(audioContext.currentTime + 0.5);
+                } catch (error) {
+                    // Fallback for browsers that don't support Web Audio API
+                    console.log('Success! 🎉');
+                }
+            }
+
+            showFeedback(message, type) {
+                const feedback = document.getElementById('feedbackMessage');
+                feedback.textContent = message;
+                feedback.className = `feedback-message ${type}`;
+            }
+
+            clearFeedback() {
+                const feedback = document.getElementById('feedbackMessage');
+                feedback.textContent = '';
+                feedback.className = 'feedback-message';
+            }
+
+            nextRound() {
+                this.currentRound++;
+                if (this.currentRound % 2 === 0) {
+                    this.level++;
+                    this.updateLevel();
+                }
+                
+                // Re-enable all cards
+                const allCards = document.querySelectorAll('.option-card');
+                allCards.forEach(c => {
+                    c.style.pointerEvents = 'auto';
+                    c.className = 'option-card';
+                });
+                
+                this.startNewRound();
+            }
+
+            updateScore() {
+                document.getElementById('score').textContent = this.score;
+            }
+
+            updateLevel() {
+                document.getElementById('level').textContent = this.level;
+            }
+        }
+
+        // Start the game when the page loads
+        window.addEventListener('load', () => {
+            new ColorMatchingGame();
+        });
+    </script>
+</body>
+</html>
